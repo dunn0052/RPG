@@ -10,3 +10,6 @@ class CHARACTER:
         self.NAME = data[5]
         self.CURRENT_HEALTH = self.HEALTH
         self.ACTIONS = data[6]
+        self.ATB_START = data[7]
+        self.ATB_RATE = data[8]
+        self.ATB_MAX = data[9]

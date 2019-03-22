@@ -1,14 +1,15 @@
 from pygame_functions import *
 import CHARACTER as c
 import controllerIO as ct
-
+import _thread
 
 class BATTLE:
-    def __init__(self, bg, characters, enemies, controller, x = 600, y = 600):
+    def __init__(self, bg, characters, enemies, controller, x = 600, y = 600,sound = False):
         # SOUND #
-        bgMusic = makeMusic("sounds/110Fighting.mp3")
-        menuBlip = makeSound("sounds/DCMenuTing.wav")
-        playMusic(3)
+        if sound:
+            self.BG_MUSIC = makeMusic("sounds/110Fighting.mp3")
+            self.MENU_BLIP = makeSound("sounds/DCMenuTing.wav")
+            playMusic(3)
         # DATA #
         self.POINTER_BUFFER = -15
         self.ENEMIES = enemies
@@ -21,11 +22,12 @@ class BATTLE:
         self.healthOffsetX = int(3/4*x)
         self.charOffsetY = int(5/12*y)
         self.enemyOffsetY = (1/6*y)
+        self.ATB_TIMER = 0
         #init FPS#
         FPS = 12
 
         ## BG ##
-        screenSize(x, y)
+        self.BACKGROUND = screenSize(x, y)
         setBackgroundImage(bg)
         self.ct = controller
 
@@ -47,6 +49,16 @@ class BATTLE:
         for i in range(len(self.CHARACTERS)):
             self.health.append(makeLabel(str(self.CHARACTERS[i].CURRENT_HEALTH), self.fontSize, self.healthOffsetX, (i*30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
             showLabel(self.health[-1])
+
+        # ATB #
+        self.ATB = []
+        self.ATB_METER = []
+        for i in range(len(self.CHARACTERS)):
+            self.ATB.append(makeSprite("images/ATB.png"))
+            moveSprite(self.ATB[-1], 500, self.menuOffsetY + i * 30)
+            showSprite(self.ATB[-1])
+
+
 
         # ENEMY NAMES ##
         self.enames = []
@@ -74,11 +86,14 @@ class BATTLE:
 
         ## Main loop ##
         self.inBattle = True
-        ## character select ##
         self.prev = None
         self.current = None
         self.charSelect = 0
+
+
+        ## MAIN LOOP BEGIN ##
         while self.inBattle:
+            
             self.button = self.ct.getInput()
             # wait for individual inputs #
             if self.button != self.prev:
@@ -92,7 +107,8 @@ class BATTLE:
             if self.current == "up":
                 if self.charSelect > 0:
                     self.charSelect-=1
-                    playSound(menuBlip, 0)
+                    if sound:
+                        playSound(self.MENU_BLIP, 0)
                     moveSprite(self.pointer, self.party[self.charSelect].rect.center[0], self.party[self.charSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
                     changeLabel(self.names[self.charSelect], self.CHARACTERS[self.charSelect].NAME, fontColour= "yellow")
                     changeLabel(self.names[self.charSelect+1], self.CHARACTERS[self.charSelect+1].NAME, fontColour= "white")
@@ -100,7 +116,8 @@ class BATTLE:
             if self.current == "down":
                 if self.charSelect < len(self.party)-1:
                     self.charSelect+=1
-                    playSound(menuBlip, 0)
+                    if sound:
+                        playSound(self.MENU_BLIP, 0)
                     moveSprite(self.pointer, self.party[self.charSelect].rect.center[0], self.party[self.charSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
                     changeLabel(self.names[self.charSelect], self.CHARACTERS[self.charSelect].NAME, fontColour= "yellow")
                     changeLabel(self.names[self.charSelect-1], self.CHARACTERS[self.charSelect-1].NAME, fontColour= "white")
@@ -110,70 +127,92 @@ class BATTLE:
         ## ACTION MENU##
 
             if self.current == "a":
-                for name in self.enames:
-                    hideLabel(name)
-                    
-                self.actions = []
-                ## IN MENU ##
+                if self.CHARACTERS[self.turn].ATB_START != self.CHARACTERS[self.turn].ATB_MAX:
+                    pass
+                else:
+                    for name in self.enames:
+                        hideLabel(name)
+                        
+                    self.actions = []
+                    ## IN MENU ##
 
-                # INITIALIZE MENU TEXT #
-                for i in range(len(self.CHARACTERS[i].ACTIONS)):
-                    self.actions.append(makeLabel(self.CHARACTERS[self.turn].ACTIONS[i], self.fontSize, 50, (i * 30)+ self.menuOffsetY, "white", font ="fonts/lunchds.ttf", background = 'clear'))
-                    showLabel(self.actions[-1])
-                changeLabel(self.actions[0], self.CHARACTERS[self.turn].ACTIONS[0], fontColour = "yellow")
+                    # INITIALIZE MENU TEXT #
+                    for i in range(len(self.CHARACTERS[i].ACTIONS)):
+                        self.actions.append(makeLabel(self.CHARACTERS[self.turn].ACTIONS[i], self.fontSize, 50, (i * 30)+ self.menuOffsetY, "white", font ="fonts/lunchds.ttf", background = 'clear'))
+                        showLabel(self.actions[-1])
+                    changeLabel(self.actions[0], self.CHARACTERS[self.turn].ACTIONS[0], fontColour = "yellow")
 
-                # IN MENU CONTROL #
-                self.menuOption = 0 # start with first option
-                self.menuOpen = True # menu open option
-                self.menuPrev = "a"
-                self.menuInput = None
-                while self.menuOpen:
-                    self.menuButton = self.ct.getInput()
-                    if self.menuButton != self.menuPrev:
+                    # IN MENU CONTROL #
+                    self.menuOption = 0 # start with first option
+                    self.menuOpen = True # menu open option
+                    self.menuPrev = "a"
+                    self.menuInput = None
+                    while self.menuOpen:
+                        self.menuButton = self.ct.getInput()
+                        if self.menuButton != self.menuPrev:
 
-                        self.menuInput = self.menuButton
-                        self.menuPrev = self.menuButton
-                    else:
-                        self.menuInput = None
+                            self.menuInput = self.menuButton
+                            self.menuPrev = self.menuButton
+                        else:
+                            self.menuInput = None
 
-                    # ACTION MENU SELECT #
-                    if self.menuInput == "up":
-                        if self.menuOption > 0:
-                            self.menuOption-=1
+                        # ACTION MENU SELECT #
+                        if self.menuInput == "up":
+                            if self.menuOption > 0:
+                                self.menuOption-=1
 
-                            changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
-                            changeLabel(self.actions[self.menuOption+1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption+1], fontColour= "white")
-                    elif self.menuInput == "down":
-                        if self.menuOption < len(self.actions)-1:
-                            self.menuOption+=1
+                                changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
+                                changeLabel(self.actions[self.menuOption+1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption+1], fontColour= "white")
+                        elif self.menuInput == "down":
+                            if self.menuOption < len(self.actions)-1:
+                                self.menuOption+=1
 
-                            changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
-                            changeLabel(self.actions[self.menuOption-1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption-1], fontColour= "white")
+                                changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
+                                changeLabel(self.actions[self.menuOption-1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption-1], fontColour= "white")
 
-                    # PICK ACTION #
-                    elif self.menuInput == "a":
-                        self.actionDict[self.CHARACTERS[self.turn].ACTIONS[self.menuOption]](self.CHARACTERS[self.turn])
-                        self.menuPrev = "b"
+                        # PICK ACTION #
+                        elif self.menuInput == "a":
+                            self.actionDict[self.CHARACTERS[self.turn].ACTIONS[self.menuOption]](self.CHARACTERS[self.turn])
+                            self.menuPrev = "b"
 
 
 
-                    # CLOSE MENU #
-                    elif self.menuInput == "b":
-                        for i in range(len(self.actions)):
-                            hideLabel(self.actions[i])
-                        self.actions = []
-                        self.menuOpen = False
-                    updateDisplay()
+                        # CLOSE MENU #
+                        elif self.menuInput == "b":
+                            for i in range(len(self.actions)):
+                                hideLabel(self.actions[i])
+                            self.actions = []
+                            self.menuOpen = False
+                        updateDisplay()
             #end menu loop
                     
             updateDisplay()
+            
+##            ## ATB TIMER ##
+##            for i in range(len(self.CHARACTERS)):
+##                drawRect(505, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
+##
+##                if self.CHARACTERS[i].ATB_START < 48:
+##                    self.CHARACTERS[i].ATB_START +=self.CHARACTERS[i].ATB_RATE
+##                else:
+##                    self.CHARACTERS[i].ATB_START = 0
+##                    drawRect(505, self.menuOffsetY + 6 + i * 30, self.CHARACTERS[i].ATB_START, 14, (255,255,255,128), linewidth = 0)
+##                    
+
+        ##ATB THREAD ##
+            _thread.start_new_thread(self.ATBtimer, (None,))
+        
             tick(FPS)
+            ## all enemies are dead? ##
             if not self.ENEMIES:
                 self.inBattle = False
             #end battle loop
-        stopMusic()
-        endMusic = makeMusic("sounds/111Fanfare.mp3")
-        playMusic()
+
+        ## END BATTLE MUSIC ##
+        if sound:
+            stopMusic()
+            endMusic = makeMusic("sounds/111Fanfare.mp3")
+            playMusic()
         endWait()
 
     def attack(self, char):
@@ -238,6 +277,7 @@ class BATTLE:
                 attackPointer = False
                 # move pointer back to original
                 moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                self.CHARACTERS[self.turn].ATB_START = 0
                 
             if attackCurrent == "b":
                 changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "white")
@@ -265,13 +305,24 @@ class BATTLE:
         print(char.NAME,"defended")
         return None
 
-enem = ["images/mariorpg_bundt.gif",None, 20, 20, 20, "Cake0", ["Fight", "Defend"]]
-data = ["images/starmanMINI.png",None, 10,10,10, "Starman0", ["Fight", "Defend"]]
+    def ATBtimer(self, n):
+         for i in range(len(self.CHARACTERS)):
+                drawRect(505, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
+
+                if self.CHARACTERS[i].ATB_START < self.CHARACTERS[self.turn].ATB_MAX:
+                    self.CHARACTERS[i].ATB_START +=self.CHARACTERS[i].ATB_RATE
+                else:
+                   drawRect(505, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
+ 
+
+enem = ["images/mariorpg_bundt.gif",None, 20, 20, 20, "Cake0", ["Fight", "Defend"],0,1, 48]
+data = ["images/starmanMINI.png",None, 10,10,10, "Starman0", ["Fight", "Defend"],0, 1, 48]
 char = []
 combatants = []
 for i in range(3):
     char.append(c.CHARACTER(data))
     data[5] = data[5][:-1]+str(i+1)
+    data[8] = i+1
 for i in range(2):
     combatants.append(c.CHARACTER(enem))
     enem[5] = enem[5][:-1]+ str(i+1)
