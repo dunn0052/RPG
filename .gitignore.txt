@@ -1,0 +1,7 @@
+*.pdf
+*.wav
+*.mp3
+*.jpg
+*.png
+*.gif
+*.ttf
