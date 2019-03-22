@@ -469,9 +469,10 @@ def pause(milliseconds, allowEsc=True):
 def drawRect(xpos, ypos, width, height, colour, linewidth=0):
     global bgSurface
     colour = parseColour(colour)
-    thisrect = pygame.draw.rect(screen, colour, [xpos, ypos, width, height], linewidth)
+    thisrect = pygame.draw.rect(background.surface, colour, [xpos, ypos, width, height], linewidth)
     if screenRefresh:
         pygame.display.update(thisrect)
+    return thisrect
 
 
 def drawLine(x1, y1, x2, y2, colour, linewidth=1):
@@ -493,7 +494,7 @@ def drawPolygon(pointlist, colour, linewidth=0):
 def drawEllipse(centreX, centreY, width, height, colour, linewidth=0):
     global bgSurface
     colour = parseColour(colour)
-    thisrect = pygame.Rect(centreX - width / 2, centreY - height / 2, width, height)
+    thisrect = pygame.Rect(centreX, centreY, width, height)
     pygame.draw.ellipse(screen, colour, thisrect, linewidth)
     if screenRefresh:
         pygame.display.update(thisrect)
