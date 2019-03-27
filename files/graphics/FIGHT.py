@@ -292,7 +292,7 @@ class BATTLE:
 
 
     def defend(self, char):
-        ## same as press b in menu
+        ## same as press b in menu 
         for i in range(len(self.actions)):
             hideLabel(self.actions[i])
         self.actions = []
