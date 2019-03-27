@@ -303,6 +303,7 @@ class BATTLE:
         # move pointer back to original
         moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
         print(char.NAME,"defended")
+        self.CHARACTERS[self.turn].ATB_START = 0
         return None
 
     def ATBtimer(self, n):
