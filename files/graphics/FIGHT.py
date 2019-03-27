@@ -2,14 +2,16 @@ from pygame_functions import *
 import CHARACTER as c
 import controllerIO as ct
 import _thread
+from PygameFunctionClass import *
 
+pg = PygameFunctionClass()
 class BATTLE:
     def __init__(self, bg, characters, enemies, controller, x = 600, y = 600,sound = False):
         # SOUND #
         if sound:
             self.BG_MUSIC = makeMusic("sounds/110Fighting.mp3")
             self.MENU_BLIP = makeSound("sounds/DCMenuTing.wav")
-            playMusic(3)
+            pg.playMusic(3)
         # DATA #
         self.POINTER_BUFFER = -15
         self.ENEMIES = enemies
@@ -27,60 +29,60 @@ class BATTLE:
         FPS = 12
 
         ## BG ##
-        self.BACKGROUND = screenSize(x, y)
-        setBackgroundImage(bg)
+        self.BACKGROUND = pg.screenSize(x, y)
+        pg.setBackgroundImage(bg)
         self.ct = controller
 
         ## MENU ##
-        self.menuBox = makeSprite("images/pixelBox.png")
-        moveSprite(self.menuBox, 0, 0)
-        showSprite(self.menuBox)
+        self.menuBox = pg.makeSprite("images/pixelBox.png")
+        pg.moveSprite(self.menuBox, 0, 0)
+        pg.showSprite(self.menuBox)
 
         # NAMES ##
         self.names = []
         for i in range(len(self.CHARACTERS)):
-            self.names.append(makeLabel(self.CHARACTERS[i].NAME, self.fontSize, self.nameOffsetX, (i *30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
-            showLabel(self.names[-1])
-        changeLabel(self.names[0], self.CHARACTERS[0].NAME, fontColour= "yellow")
+            self.names.append(pg.makeLabel(self.CHARACTERS[i].NAME, self.fontSize, self.nameOffsetX, (i *30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
+            pg.showLabel(self.names[-1])
+        pg.changeLabel(self.names[0], self.CHARACTERS[0].NAME, fontColour= "yellow")
 
 
         # HEALTH #
         self.health = []
         for i in range(len(self.CHARACTERS)):
-            self.health.append(makeLabel(str(self.CHARACTERS[i].CURRENT_HEALTH), self.fontSize, self.healthOffsetX, (i*30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
-            showLabel(self.health[-1])
+            self.health.append(pg.makeLabel(str(self.CHARACTERS[i].CURRENT_HEALTH), self.fontSize, self.healthOffsetX, (i*30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
+            pg.showLabel(self.health[-1])
 
         # ATB #
         self.ATB = []
         self.ATB_METER = []
         for i in range(len(self.CHARACTERS)):
-            self.ATB.append(makeSprite("images/ATB.png"))
-            moveSprite(self.ATB[-1], 500, self.menuOffsetY + i * 30)
-            showSprite(self.ATB[-1])
+            self.ATB.append(pg.makeSprite("images/ATB.png"))
+            pg.moveSprite(self.ATB[-1], 500, self.menuOffsetY + i * 30)
+            pg.showSprite(self.ATB[-1])
 
 
 
         # ENEMY NAMES ##
         self.enames = []
         for i in range(len(self.ENEMIES)):
-            self.enames.append(makeLabel(self.ENEMIES[i].NAME, self.fontSize, 50, (i *30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
-            showLabel(self.enames[-1])
+            self.enames.append(pg.makeLabel(self.ENEMIES[i].NAME, self.fontSize, 50, (i *30)+self.menuOffsetY, "white", "fonts/lunchds.ttf", background = 'clear'))
+            pg.showLabel(self.enames[-1])
 
         ## SPRITES ##
         self.party = []
         self.comb = []
-        self.pointer = makeSprite("images/ppointer.png")
+        self.pointer = pg.makeSprite("images/ppointer.png")
         for i in range(len(self.CHARACTERS)):
             self.party.append(makeSprite(self.CHARACTERS[i].BATTLE_IMAGE))
-            moveSprite(self.party[-1], self.charOffsetX + i* 15, (i+1) *30+ self.charOffsetY)
-            showSprite(self.party[-1])
+            pg.moveSprite(self.party[-1], self.charOffsetX + i* 15, (i+1) *30+ self.charOffsetY)
+            pg.showSprite(self.party[-1])
         for i in range(len(self.ENEMIES)):
-            self.comb.append(makeSprite(self.ENEMIES[i].BATTLE_IMAGE))
-            moveSprite(self.comb[-1], 50 - i * 15, (i +1)* 75+self.enemyOffsetY)
-            showSprite(self.comb[-1])
+            self.comb.append(pg.makeSprite(self.ENEMIES[i].BATTLE_IMAGE))
+            pg.moveSprite(self.comb[-1], 50 - i * 15, (i +1)* 75+self.enemyOffsetY)
+            pg.showSprite(self.comb[-1])
 
-        moveSprite(self.pointer, self.party[0].rect.center[0], self.party[0].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
-        showSprite(self.pointer)
+        pg.moveSprite(self.pointer, self.party[0].rect.center[0], self.party[0].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+        pg.showSprite(self.pointer)
 
         ## make adjustable menu screen ##
 
@@ -108,20 +110,20 @@ class BATTLE:
                 if self.charSelect > 0:
                     self.charSelect-=1
                     if sound:
-                        playSound(self.MENU_BLIP, 0)
-                    moveSprite(self.pointer, self.party[self.charSelect].rect.center[0], self.party[self.charSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
-                    changeLabel(self.names[self.charSelect], self.CHARACTERS[self.charSelect].NAME, fontColour= "yellow")
-                    changeLabel(self.names[self.charSelect+1], self.CHARACTERS[self.charSelect+1].NAME, fontColour= "white")
-                    updateDisplay()
+                        pg.playSound(self.MENU_BLIP, 0)
+                    pg.moveSprite(self.pointer, self.party[self.charSelect].rect.center[0], self.party[self.charSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                    pg.changeLabel(self.names[self.charSelect], self.CHARACTERS[self.charSelect].NAME, fontColour= "yellow")
+                    pg.changeLabel(self.names[self.charSelect+1], self.CHARACTERS[self.charSelect+1].NAME, fontColour= "white")
+                    pg.updateDisplay()
             if self.current == "down":
                 if self.charSelect < len(self.party)-1:
                     self.charSelect+=1
                     if sound:
-                        playSound(self.MENU_BLIP, 0)
-                    moveSprite(self.pointer, self.party[self.charSelect].rect.center[0], self.party[self.charSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
-                    changeLabel(self.names[self.charSelect], self.CHARACTERS[self.charSelect].NAME, fontColour= "yellow")
-                    changeLabel(self.names[self.charSelect-1], self.CHARACTERS[self.charSelect-1].NAME, fontColour= "white")
-                    updateDisplay()
+                        pg.playSound(self.MENU_BLIP, 0)
+                    pg.moveSprite(self.pointer, self.party[self.charSelect].rect.center[0], self.party[self.charSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                    pg.changeLabel(self.names[self.charSelect], self.CHARACTERS[self.charSelect].NAME, fontColour= "yellow")
+                    pg.changeLabel(self.names[self.charSelect-1], self.CHARACTERS[self.charSelect-1].NAME, fontColour= "white")
+                    pg.updateDisplay()
             self.turn = self.charSelect # self.current choice
 
         ## ACTION MENU##
@@ -131,16 +133,16 @@ class BATTLE:
                     pass
                 else:
                     for name in self.enames:
-                        hideLabel(name)
+                        pg.hideLabel(name)
                         
                     self.actions = []
                     ## IN MENU ##
 
                     # INITIALIZE MENU TEXT #
                     for i in range(len(self.CHARACTERS[i].ACTIONS)):
-                        self.actions.append(makeLabel(self.CHARACTERS[self.turn].ACTIONS[i], self.fontSize, 50, (i * 30)+ self.menuOffsetY, "white", font ="fonts/lunchds.ttf", background = 'clear'))
-                        showLabel(self.actions[-1])
-                    changeLabel(self.actions[0], self.CHARACTERS[self.turn].ACTIONS[0], fontColour = "yellow")
+                        self.actions.append(pg.makeLabel(self.CHARACTERS[self.turn].ACTIONS[i], self.fontSize, 50, (i * 30)+ self.menuOffsetY, "white", font ="fonts/lunchds.ttf", background = 'clear'))
+                        pg.showLabel(self.actions[-1])
+                    pg.changeLabel(self.actions[0], self.CHARACTERS[self.turn].ACTIONS[0], fontColour = "yellow")
 
                     # IN MENU CONTROL #
                     self.menuOption = 0 # start with first option
@@ -161,14 +163,14 @@ class BATTLE:
                             if self.menuOption > 0:
                                 self.menuOption-=1
 
-                                changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
-                                changeLabel(self.actions[self.menuOption+1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption+1], fontColour= "white")
+                                pg.changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
+                                pg.changeLabel(self.actions[self.menuOption+1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption+1], fontColour= "white")
                         elif self.menuInput == "down":
                             if self.menuOption < len(self.actions)-1:
                                 self.menuOption+=1
 
-                                changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
-                                changeLabel(self.actions[self.menuOption-1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption-1], fontColour= "white")
+                                pg.changeLabel(self.actions[self.menuOption], self.CHARACTERS[self.turn].ACTIONS[self.menuOption], fontColour= "yellow")
+                                pg.changeLabel(self.actions[self.menuOption-1], self.CHARACTERS[self.turn].ACTIONS[self.menuOption-1], fontColour= "white")
 
                         # PICK ACTION #
                         elif self.menuInput == "a":
@@ -180,13 +182,13 @@ class BATTLE:
                         # CLOSE MENU #
                         elif self.menuInput == "b":
                             for i in range(len(self.actions)):
-                                hideLabel(self.actions[i])
+                                pg.hideLabel(self.actions[i])
                             self.actions = []
                             self.menuOpen = False
-                        updateDisplay()
+                        pg.updateDisplay()
             #end menu loop
                     
-            updateDisplay()
+            pg.updateDisplay()
             
 ##            ## ATB TIMER ##
 ##            for i in range(len(self.CHARACTERS)):
@@ -202,7 +204,7 @@ class BATTLE:
         ##ATB THREAD ##
             _thread.start_new_thread(self.ATBtimer, (None,))
         
-            tick(FPS)
+            pg.tick(FPS)
             ## all enemies are dead? ##
             if not self.ENEMIES:
                 self.inBattle = False
@@ -210,25 +212,25 @@ class BATTLE:
 
         ## END BATTLE MUSIC ##
         if sound:
-            stopMusic()
-            endMusic = makeMusic("sounds/111Fanfare.mp3")
-            playMusic()
-        endWait()
+            pg.stopMusic()
+            endMusic = pg.makeMusic("sounds/111Fanfare.mp3")
+            pg.playMusic()
+        pg.endWait()
 
     def attack(self, char):
         attackPointer = True
         # move pointer to enemy side
-        moveSprite(self.pointer, self.comb[0].rect.center[0], self.comb[0].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+        pg.moveSprite(self.pointer, self.comb[0].rect.center[0], self.comb[0].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
         ## character select ##
         attackPrev = "a"
         attackCurrent = None
         attackCharSelect = 0
 
         for i in self.actions:
-            hideLabel(i)
+            pg.hideLabel(i)
         for i in self.enames:
-            showLabel(i)
-        changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "yellow")
+            pg.showLabel(i)
+        pg.changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "yellow")
         while attackPointer:
             attackButton = self.ct.getInput()
             # wait for individual inputs #
@@ -244,75 +246,75 @@ class BATTLE:
                 if attackCharSelect > 0:
                     attackCharSelect-=1
 
-                    moveSprite(self.pointer, self.comb[attackCharSelect].rect.center[0], self.comb[attackCharSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
-                    changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "yellow")
-                    changeLabel(self.enames[attackCharSelect+1], self.ENEMIES[attackCharSelect+1].NAME, fontColour= "white")
+                    pg.moveSprite(self.pointer, self.comb[attackCharSelect].rect.center[0], self.comb[attackCharSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                    pg.changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "yellow")
+                    pg.changeLabel(self.enames[attackCharSelect+1], self.ENEMIES[attackCharSelect+1].NAME, fontColour= "white")
             if attackCurrent == "down":
                 if attackCharSelect < len(self.comb)-1:
                     attackCharSelect+=1
 
-                    moveSprite(self.pointer, self.comb[attackCharSelect].rect.center[0], self.comb[attackCharSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
-                    changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "yellow")
-                    changeLabel(self.enames[attackCharSelect-1], self.ENEMIES[attackCharSelect-1].NAME, fontColour= "white")
+                    pg.moveSprite(self.pointer, self.comb[attackCharSelect].rect.center[0], self.comb[attackCharSelect].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                    pg.changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "yellow")
+                    pg.changeLabel(self.enames[attackCharSelect-1], self.ENEMIES[attackCharSelect-1].NAME, fontColour= "white")
 
                     
             if attackCurrent == "a":
                 ## boy, look at all of this action ##
                 self.ENEMIES[attackCharSelect].CURRENT_HEALTH -= char.ATTACK
-                changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "white")
+                pg.changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "white")
                 print(self.ENEMIES[attackCharSelect].CURRENT_HEALTH)
                 if(self.ENEMIES[attackCharSelect].CURRENT_HEALTH <= 0):
-                    hideSprite(self.comb[attackCharSelect])
-                    hideLabel(self.enames[attackCharSelect])
+                    pg.hideSprite(self.comb[attackCharSelect])
+                    pg.hideLabel(self.enames[attackCharSelect])
                     del self.enames[attackCharSelect]
                     del self.comb[attackCharSelect]
                     del self.ENEMIES[attackCharSelect]
                 ## same as press b in menu
                 for i in range(len(self.actions)):
-                    hideLabel(self.actions[i])
+                    pg.hideLabel(self.actions[i])
                 self.actions = []
                 #menu esc
                 self.menuOpen = False
                 #escape attack
                 attackPointer = False
                 # move pointer back to original
-                moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                pg.moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
                 self.CHARACTERS[self.turn].ATB_START = 0
                 
             if attackCurrent == "b":
-                changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "white")
+                pg.changeLabel(self.enames[attackCharSelect], self.ENEMIES[attackCharSelect].NAME, fontColour= "white")
                 for i in self.actions:
-                    showLabel(i)
+                    pg.showLabel(i)
                 for i in self.enames:
-                    hideLabel(i)
-                moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+                    pg.hideLabel(i)
+                pg.moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
                 # go back to action menu
                 attackPointer = False
-        updateDisplay()
+        pg.updateDisplay()
 
 
     def defend(self, char):
         ## same as press b in menu
         for i in range(len(self.actions)):
-            hideLabel(self.actions[i])
+            pg.hideLabel(self.actions[i])
         self.actions = []
         #menu esc
         self.menuOpen = False
         #escape attack
         attackPointer = False
         # move pointer back to original
-        moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
+        pg.moveSprite(self.pointer, self.party[self.turn].rect.center[0], self.party[self.turn].rect.topleft[1]+self.POINTER_BUFFER, centre = True)
         print(char.NAME,"defended")
         return None
 
     def ATBtimer(self, n):
          for i in range(len(self.CHARACTERS)):
-                drawRect(505, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
+                pg.drawRect(506, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
 
                 if self.CHARACTERS[i].ATB_START < self.CHARACTERS[self.turn].ATB_MAX:
                     self.CHARACTERS[i].ATB_START +=self.CHARACTERS[i].ATB_RATE
                 else:
-                   drawRect(505, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
+                   pg.drawRect(506, self.menuOffsetY + 6+ i * 30, self.CHARACTERS[i].ATB_START, 14, "green", linewidth = 0)
  
 
 enem = ["images/mariorpg_bundt.gif",None, 20, 20, 20, "Cake0", ["Fight", "Defend"],0,1, 48]
@@ -327,4 +329,4 @@ for i in range(2):
     combatants.append(c.CHARACTER(enem))
     enem[5] = enem[5][:-1]+ str(i+1)
 cont = ct.Controller(0)
-fight = BATTLE("images/battleBG.png", char, combatants, cont, 600, 600)
+fight = BATTLE("images/battleBG.png", char, combatants, cont, 600, 600, False)
